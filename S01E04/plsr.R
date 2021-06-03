@@ -20,13 +20,8 @@ str(res_pca)
 train_proj <- as.data.frame(res_pca$ind$coord)
 test_proj  <- as.data.frame(res_pca$ind.sup$coord)
 
-train <- train[order(row.names(train)),]
-train_proj <- train_proj[order(row.names(train_proj)),]
-test  <- test[order(row.names(test)),]
-test_proj  <- test_proj[order(row.names(test_proj)),]
-
-train_proj$Points <- train$Points
-test_proj$Points  <- test$Points
+train_proj <- merge(train_proj,train["Points"], by="row.names")
+test_proj  <- merge(test_proj,test["Points"], by="row.names")
 
 model_pcr <- lm(Points~Dim.1+Dim.2+Dim.3, train_proj)
 summary(model_pcr)
@@ -53,11 +48,12 @@ ggplot() +
 
 # plsr ----------------------------
 
-
-train
 plsr_fit <- plsr(Points ~ ., ncomp=6, data = train[,c(1:10,12)], scale=T )
 summary(plsr_fit)
 
 plot(RMSEP(plsr_fit), legendpos = "topright")
+
+plot(plsr_fit, ncomp = 2, asp = 1, line = TRUE)
+plot(test$Points,predict(plsr_fit,test[,c(1:10,12)])[,,"1 comps"])
 
 plot(plsr_fit, ncomp = 2, asp = 1, line = TRUE)
